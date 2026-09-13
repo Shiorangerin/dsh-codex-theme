@@ -2,7 +2,7 @@
 
 把 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的 Web UI 换装成 Codex 桌面端外观的一组 DSH 插件。
 
-<img width="943" alt="screenshot" src="https://github.com/Shiorangerin/dsh-codex-theme/blob/main/screenshot.png?raw=true" />
+<img width="943" alt="screenshot" src="screenshot.png" />
 
 > **试验性项目**：这是对 DSH 官方产物（CSS module 哈希类名 + 私有 loader 协议）的逆向覆盖层，上游一更新就可能部分失效。自己玩很爽，别指望它稳定。
 
