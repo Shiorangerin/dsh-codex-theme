@@ -1,0 +1,1080 @@
+/* ==========================================================================
+   Codex theme for the DeepSeek Harness web UI
+   --------------------------------------------------------------------------
+   A visual reskin mapping the ChatGPT/Codex desktop design language onto the
+   harness UI. Every colour was sampled from real Codex screenshots, so the
+   palette is measured rather than guessed.
+
+   Editing this file needs no rebuild: reload the page and it is live. The
+   stylesheet is served with `cache-control: no-store`.
+
+   Two harness details shape the selectors below.
+
+   1. Tokens need `!important`. The layout theme presenter writes the alias
+      tokens as inline custom properties on <body>, and inline declarations beat
+      any author rule, so a plain `body[data-ds-dark-theme]` block loses.
+
+   2. Class names are CSS-module generated and keep the module-local name, but
+      the surrounding shape varies by bundle:
+        `SWsXOW_card`               (client plugin bundle)
+        `._VbHBG_newSessionLabel`   (client plugin bundle, older shape)
+        `._card_12o37_70`           (shell bundle)
+      So a substring match over-matches siblings (`_card` vs
+      `_cardWorkspaceTrigger`) while an exact hash breaks on every rebuild.
+      Every rule therefore matches a whole class token instead:
+        [class$='_card']   the token is last in the attribute
+        [class*='_card ']  the token is followed by another class
+        [class*='_card_']  the shell shape, whose hash follows the name
+      A plain substring is deliberately never used.
+      ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   0. Window chrome
+   The shell uses `titleBarStyle: 'hiddenInset'`, so the traffic lights float
+   over the content exactly as in Codex. That needs two things: a draggable
+   band where the lights sit, and enough top padding that no sidebar control is
+   buried under them.
+   -------------------------------------------------------------------------- */
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  z-index: 999;
+  -webkit-app-region: drag;
+}
+
+/* --------------------------------------------------------------------------
+   1. Palette
+   Codex keeps a pure-neutral dark scheme, and its sidebar sits LIGHTER than
+   the main column — the opposite of the harness default, whose neutrals also
+   carry a blue cast.
+   -------------------------------------------------------------------------- */
+
+/* Doubled attribute + html ancestor: wins the specificity tie against the
+   runtime-injected theme sheet even when both sides use !important. */
+html body[data-ds-dark-theme][data-ds-dark-theme] {
+  /* Surfaces */
+  --dsw-alias-bg-base: #181818 !important;
+  --dsw-specific-sidebar-fill: #272828 !important;
+  --dsw-specific-input-major: #2a2a2a !important;
+  --dsw-alias-bg-layer-1: #212121 !important;
+  --dsw-alias-bg-layer-2: #2a2a2a !important;
+  --dsw-alias-bg-layer-3: #2d2d2d !important;
+  --dsw-specific-menu: #1f1f1f !important;
+  --dsw-alias-bg-overlay: #242424 !important;
+  --dsw-alias-bg-module-platform: #242424 !important;
+  --dsw-alias-bg-multi-select: #2d2d2d !important;
+  --dsw-alias-bg-skeleton: rgba(255, 255, 255, 0.06) !important;
+
+  /* Text */
+  --dsw-alias-label-primary: #dfdfdf !important;
+  --dsw-alias-label-primary-bluish: #dfdfdf !important;
+  --dsw-alias-label-primary-dimmed: #c3c3c3 !important;
+  --dsw-alias-label-primary-inverted: #181818 !important;
+  --dsw-alias-label-primary-foreground: #181818 !important;
+  --dsw-alias-label-secondary: #c3c3c3 !important;
+  --dsw-alias-label-tertiary: #787878 !important;
+  --dsw-alias-label-caption: #787878 !important;
+  --dsw-alias-label-dimmed: #6f6f6f !important;
+  --dsw-alias-brand-text: #dfdfdf !important;
+  --dsw-alias-link: #88a4ff !important;
+
+  /* Borders */
+  --dsw-alias-border-l1: rgba(255, 255, 255, 0.05) !important;
+  --dsw-alias-border-l2: rgba(255, 255, 255, 0.07) !important;
+  --dsw-alias-border-l2-darkmode-thin: rgba(255, 255, 255, 0.06) !important;
+  --dsw-alias-border-l3: #2b2b2b !important;
+  --dsw-alias-border-l4: rgba(255, 255, 255, 0.14) !important;
+  --dsw-alias-border-inverted: rgba(255, 255, 255, 0.06) !important;
+  --dsw-alias-border-inverted2: rgba(255, 255, 255, 0.08) !important;
+
+  /* Interaction */
+  --dsw-alias-interactive-bg-hover: rgba(255, 255, 255, 0.06) !important;
+  --dsw-alias-interactive-bg-active: rgba(255, 255, 255, 0.1) !important;
+  --dsw-alias-interactive-bg-hover-accent: rgba(255, 255, 255, 0.14) !important;
+  --dsw-alias-interactive-bg-hover-solid: #2f2f2f !important;
+  --dsw-alias-interactive-bg-hover-danger: rgba(242, 90, 90, 0.14) !important;
+
+  /* Buttons: Codex's affirmative control is a light pill on dark */
+  --dsw-alias-button-primary-fill: #dfdfdf !important;
+  --dsw-alias-button-primary-hover: #f2f2f2 !important;
+  --dsw-alias-button-primary-dimmed: #3a3a3a !important;
+  --dsw-alias-button-contrast-fill: #dfdfdf !important;
+  --dsw-alias-button-elevated-fill: #2d2d2d !important;
+  --dsw-alias-button-floating-fill: #2d2d2d !important;
+  --dsw-alias-button-floating-hover: #383838 !important;
+  --dsw-alias-button-ghost-active-fill: #2d2d2d !important;
+  --dsw-alias-button-ghost-active-hover: #383838 !important;
+  --dsw-alias-button-ghost-active-border: #3d3d3d !important;
+  --dsw-alias-button-tool-bar-fill: rgba(255, 255, 255, 0.08) !important;
+  --dsw-alias-button-tool-bar-fill-invisible: transparent !important;
+  --dsw-alias-button-tool-bar-hover: rgba(255, 255, 255, 0.14) !important;
+
+  /* Sidebar navigation states */
+  --dsw-specific-sidebar-nav-item-hover: rgba(255, 255, 255, 0.06) !important;
+  --dsw-specific-sidebar-nav-item-active: rgba(255, 255, 255, 0.1) !important;
+  --dsw-specific-sidebar-nav-item-active-accent: rgba(255, 255, 255, 0.14) !important;
+  --dsw-specific-selector: #2d2d2d !important;
+  --dsw-specific-tip: #2d2d2d !important;
+
+  /* Markdown surfaces */
+  --dsw-alias-markdown-code-block: #101010 !important;
+  --dsw-alias-markdown-code-block-banner: #1c1c1c !important;
+  --dsw-alias-markdown-inline-code: rgba(255, 255, 255, 0.08) !important;
+  --dsw-alias-markdown-code-segment-selected: #303030 !important;
+  --dsw-alias-markdown-code-segment-unselected: #1c1c1c !important;
+
+  /* Chat bubbles: Codex keeps these barely lighter than the canvas */
+  --dsw-specific-bubble: #262626 !important;
+  --dsw-specific-bubble-highlight: #2f2f2f !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Shell
+   -------------------------------------------------------------------------- */
+
+/* Codex starts its sidebar below a title-bar row: the traffic lights, then the
+   sidebar toggle, then back/forward. The brand row sits under it. The harness
+   instead puts the toggle at the end of the brand row and starts everything at
+   the very top, so the toggle is pinned into a title-bar row of its own.
+
+   `top: 4px` centres the 30px target on y≈19pt, which is where the traffic
+   lights sit; `top: 13px` left it visibly below them. Codex's brand row centres
+   on 58.8pt and its first nav row on 97.5pt; 37px of top padding lands the two
+   within ~3pt of both. */
+[class$='_sidebarCol'],
+[class*='_sidebarCol '] {
+  border-right: 1px solid #2b2b2b !important;
+  padding-top: 37px;
+  box-sizing: border-box;
+}
+
+[class$='_frame'] [class$='_toggle'],
+[class*='_frame '] [class$='_toggle'] {
+  position: fixed !important;
+  top: 4px !important;
+  left: 86px !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+  color: #c3c3c3 !important;
+  -webkit-app-region: no-drag;
+  z-index: 1000 !important;
+}
+
+[class$='_frame'] [class$='_toggle']:hover,
+[class*='_frame '] [class$='_toggle']:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #dfdfdf !important;
+}
+
+[class$='_centerCol'],
+[class*='_centerCol '] {
+  background: #181818;
+}
+
+/* Drag handles stay invisible until hovered, as in Codex. */
+[class$='_handle']:hover,
+[class*='_handle ']:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. Sidebar
+   Codex runs 32pt hairline rows, an unboxed "New chat" row, and flat section
+   labels — the harness instead draws a full-width bordered button.
+   -------------------------------------------------------------------------- */
+
+/* Codex's header row is one text line. The harness reserves 60px for a brand
+   mark, a name, a build badge and a collapse button. */
+[class$='_logoRow'],
+[class*='_logoRow '],
+[class*='_logoRow_'] {
+  height: 34px !important;
+  padding: 4px 0 4px 5px !important;
+  margin-bottom: 2px !important;
+}
+
+/* "New chat" in Codex is an unboxed row with the icon and label left-aligned;
+   the harness centres the pair inside a full-width 38px button. */
+[class$='_newSession'],
+[class*='_newSession '],
+[class*='_newSession_'] {
+  border: none !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 5px !important;
+  margin: 0 2px 0 !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  color: #dfdfdf !important;
+  font-weight: 400 !important;
+}
+
+[class$='_newSession']:hover,
+[class*='_newSession ']:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+[class$='_newSessionLabel'],
+[class*='_newSessionLabel '],
+[class*='_newSessionLabel_'] {
+  font-size: 14px !important;
+}
+
+/* Codex prints a bare product name in the header. The harness prints the local
+   build label there, which reads as a build artifact rather than a product.
+   `railMark` stays hidden: the collapsed toggle swaps it for a panel glyph. */
+[class$='_brandMark'],
+[class*='_brandMark '],
+[class*='_brandMark_'],
+[class$='_railMark'],
+[class*='_railMark '],
+[class*='_railMark_'] {
+  display: none !important;
+}
+
+[class$='_localBuildTitle'],
+[class*='_localBuildTitle '],
+[class*='_localBuildTitle_'] {
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+[class$='_localBuildTitle']::after,
+[class*='_localBuildTitle ']::after {
+  content: 'DeepSeek';
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #dfdfdf;
+  letter-spacing: -0.015em;
+}
+
+/* Brand row: Codex prints "ChatGPT ⌄" at ~14pt semibold. */
+/* Codex prints the product name at ~18px, the same size as its nav rows. A
+   CJK nav row at 14px reads at roughly the same visual size as 18px of Latin,
+   which is why only the brand name looked undersized. */
+[class$='_brandName'],
+[class*='_brandName '],
+[class*='_brandName_'] {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #dfdfdf !important;
+  letter-spacing: -0.015em;
+}
+
+/* The build badge is harness-specific noise next to a Codex-clean header, and
+   it clips at this sidebar width. */
+[class$='_buildVersion'],
+[class*='_buildVersion '],
+[class*='_buildVersion_'] {
+  display: none !important;
+}
+
+/* Nav and session rows */
+[class$='_panelList'],
+[class*='_panelList '],
+[class*='_panelList_'] {
+  gap: 2px !important;
+  margin-bottom: 4px !important;
+}
+
+/* Panel nav rows (the 插件 entry registered by the sidebar-plugins package).
+   They must be indistinguishable from the 新会话 row above them, as in ChatGPT:
+   same insets (icon at +5, label at +20), same 14px/30pt geometry, same
+   #dfdfdf. The nav container is 2px wider on each side than the 新会话 row's
+   box, hence the 2px side margins. */
+[class$='_panelRow'],
+[class*='_panelRow '],
+[class*='_panelRow_'] {
+  min-height: 30px !important;
+  margin: 0 2px !important;
+  padding: 0 5px !important;
+  gap: 6px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  color: #dfdfdf !important;
+}
+
+[class$='_panelRow']:hover,
+[class*='_panelRow ']:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #dfdfdf !important;
+}
+
+[class$='_panelTitle'],
+[class*='_panelTitle '],
+[class*='_panelTitle_'] {
+  font-size: 14px !important;
+  color: #dfdfdf !important;
+}
+
+/* The shell dims inactive panel glyphs to opacity 0.7 (the 新会话 row has no
+   such dimming), which made the 插件 icon read darker than its neighbour. */
+[class$='_panelGlyph'],
+[class*='_panelGlyph '],
+[class*='_panelGlyph_'] {
+  opacity: 1 !important;
+}
+
+/* Section labels, as in Codex's "Projects" / "Recents": a dim label with no
+   trailing action buttons, which appear only when the section is hovered. */
+[class$='_regionArea'],
+[class*='_regionArea '],
+[class*='_regionArea_'] {
+  margin-top: 0 !important;
+}
+
+/* Codex section headers carry no controls. The harness pins a search slot and
+   an action group to them, so they fade in only while the section is hovered. */
+[class$='_searchSlot'],
+[class*='_searchSlot '],
+[class*='_searchSlot_'],
+[class$='_headerActions'],
+[class*='_headerActions '],
+[class*='_headerActions_'] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.12s ease;
+}
+
+[class$='_sectionHeader']:hover [class$='_searchSlot'],
+[class*='_sectionHeader ']:hover [class$='_searchSlot'],
+[class$='_sectionHeader']:hover [class$='_headerActions'],
+[class*='_sectionHeader ']:hover [class$='_headerActions'] {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Codex aligns every sidebar element — title, nav, section labels, project and
+   session rows — on one inset. The harness pads rows 8px and additionally
+   reserves a 16px status slot plus a 4px title margin on session rows, which
+   pushes session titles out to ~41pt against Codex's 17pt. */
+[class$='_projectRow'],
+[class*='_projectRow '],
+[class*='_projectRow_'] {
+  height: 30px !important;
+  padding-left: 5px !important;
+}
+
+[class$='_sessionRow'],
+[class*='_sessionRow '],
+[class*='_sessionRow_'] {
+  height: 30px !important;
+  padding-left: 5px !important;
+}
+
+[class$='_sessionRow'] [class$='_title'],
+[class*='_sessionRow '] [class$='_title'] {
+  margin-left: 0 !important;
+}
+
+/* Collapse the status slot only while it is empty; a running session keeps
+   its indicator and the title yields the space back. */
+[class$='_sessionRow'] [class$='_slot']:empty,
+[class*='_sessionRow '] [class$='_slot']:empty {
+  width: 0 !important;
+}
+
+/* Workspace folder glyphs follow the row text, not the accent blue the harness
+   paints them with (Codex keeps them gray). Covers the sidebar tree; the
+   composer chip's folder is covered too, though that chip is currently hidden. */
+[class*='_projectRow'] svg,
+[class$='_folder'] svg,
+[class$='_folder'] {
+  color: #c3c3c3 !important;
+}
+
+/* The section band is 36px in the harness against Codex's ~28pt rhythm, and
+   the label is a bright primary colour where Codex uses a dim grey. */
+[class$='_sectionHeader'],
+[class*='_sectionHeader '],
+[class*='_sectionHeader_'] {
+  height: 24px !important;
+  padding-left: 5px !important;
+  margin-bottom: 0 !important;
+  /* The header is `justify-content: flex-end` and relied on the search slot's
+     `margin-left: auto` to hold the label at the left. Moving that slot to the
+     brand row left the label pushed right, so the header is reordered: label
+     first, actions pushed right themselves. */
+  justify-content: flex-start !important;
+}
+
+[class$='_headerActions'],
+[class*='_headerActions '],
+[class*='_headerActions_'] {
+  margin-left: auto !important;
+}
+
+[class$='_sectionLabel'],
+[class*='_sectionLabel '],
+[class*='_sectionLabel_'] {
+  font-size: 13px !important;
+  color: #787878 !important;
+  line-height: 18px !important;
+}
+
+[class$='_regionArea'] [class$='_iconButton'],
+[class*='_regionArea '] [class$='_iconButton'] {
+  opacity: 1;
+}
+
+/* Bottom identity / settings row */
+[class$='_footArea'],
+[class*='_footArea '],
+[class*='_footArea_'] {
+  border-top: 1px solid #2b2b2b;
+  padding-top: 6px;
+}
+
+[class$='_iconButton'],
+[class*='_iconButton '],
+[class*='_iconButton_'] {
+  border-radius: 8px !important;
+  color: #c3c3c3 !important;
+}
+
+[class$='_iconButton']:hover,
+[class*='_iconButton ']:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #dfdfdf !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Empty state
+   Codex shows one large centred sentence plus the composer: no brand mark and
+   no badge.
+   -------------------------------------------------------------------------- */
+
+[class$='_stack'],
+[class*='_stack '],
+[class*='_stack_'] {
+  gap: 26px !important;
+}
+
+[class$='_headline'],
+[class*='_headline '],
+[class*='_headline_'] {
+  font-size: 30px !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.015em;
+  color: #dfdfdf !important;
+  gap: 0 !important;
+}
+
+/* Codex's empty state contains no brand mark. */
+[class$='_fishHitbox'],
+[class*='_fishHitbox '],
+[class*='_fishHitbox_'] {
+  display: none !important;
+}
+
+/* Nor a preview badge. */
+[class$='_previewBadge'],
+[class*='_previewBadge '],
+[class*='_previewBadge_'] {
+  display: none !important;
+}
+
+[class$='_titleGroup'],
+[class*='_titleGroup '],
+[class*='_titleGroup_'] {
+  gap: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. Composer
+   Codex: one 20pt-rounded card, placeholder top-left, control row along the
+   bottom, light circular send button on the right.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --dsh-composer-card-max-width: 640px !important;
+  --dsh-composer-side-clearance: 32px !important;
+}
+
+/* The conversation root redefines the composer geometry on itself
+   (`ConversationRoot.module.css`: card max-width = chat content width + 32px),
+   and a nearer ancestor beats a `:root` declaration however important it is.
+   The root is not a direct child of the centre column — unclassed wrappers sit
+   between — so the override is declared on the composer seat instead, which is
+   unique to that module and a strict ancestor of the card. */
+[class$='_composerSeat'],
+[class*='_composerSeat '],
+[class*='_composerSeat_'],
+[class$='_composerStack'],
+[class*='_composerStack '],
+[class*='_composerStack_'] {
+  --dsh-composer-card-max-width: 640px !important;
+  --dsh-composer-side-clearance: 16px !important;
+}
+
+/* Codex's card is 98pt tall where the harness draws 114pt. */
+[class$='_composerSeat'] [class$='_input'],
+[class*='_composerSeat '] [class$='_input'] {
+  min-height: 30px !important;
+}
+
+[class$='_composerSeat'] [class$='_row'],
+[class*='_composerSeat '] [class$='_row'] {
+  min-height: 44px !important;
+}
+
+/* The workspace strip is removed (user decision): the chip is hidden and the
+   container collapses to zero height. The DOM node itself must stay — the
+   pinned top mode control is hosted in the `conversation.hero.agentPreset`
+   slot inside this very container, so `display: none` here would take the
+   标准模式 pill down with it. */
+[class$='_heroWorkspaceRow'],
+[class*='_heroWorkspaceRow '],
+[class*='_heroWorkspaceRow_'] {
+  order: 10 !important;
+  min-height: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+[class$='_heroWorkspaceRow'] > [class$='_workspace'] {
+  display: none !important;
+}
+
+/* The card's tools row (modes / model picker / send) sat a touch too high in
+   the card; shave the card's bottom padding so it settles lower. */
+[class$='_card'] > [class$='_row'] {
+  padding-bottom: 3px !important;
+}
+
+[class$='_card'],
+[class*='_card '],
+[class*='_card_'] {
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  background: #2a2a2a !important;
+  box-shadow: none !important;
+}
+
+/* The workspace chip above the card stays flat. */
+[class$='_cardWorkspaceTrigger'],
+[class*='_cardWorkspaceTrigger '],
+[class*='_cardWorkspaceTrigger_'] {
+  border-radius: 10px !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #c3c3c3 !important;
+}
+
+[class$='_placeholder'],
+[class*='_placeholder '],
+[class*='_placeholder_'] {
+  color: #8f8f8f !important;
+}
+
+/* Codex's one filled, light, circular control. */
+[class$='_primary'],
+[class*='_primary '],
+[class*='_primary_'] {
+  border-radius: 999px !important;
+  background: #dfdfdf !important;
+  color: #181818 !important;
+  border: none !important;
+}
+
+[class$='_primary']:hover,
+[class*='_primary ']:hover {
+  background: #f2f2f2 !important;
+}
+
+[class$='_primary']:disabled,
+[class*='_primary ']:disabled {
+  background: #3a3a3a !important;
+  color: #7a7a7a !important;
+}
+
+/* Round tool buttons in the composer's control row */
+[class$='_add'],
+[class*='_add '],
+[class*='_add_'] {
+  border-radius: 999px !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  color: #c3c3c3 !important;
+}
+
+[class$='_add']:hover,
+[class*='_add ']:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #dfdfdf !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. Conversation
+   Codex reads as flat text on the canvas; only the user turn is boxed.
+   -------------------------------------------------------------------------- */
+
+[class$='_bubble'],
+[class*='_bubble '],
+[class*='_bubble_'] {
+  border-radius: 14px !important;
+  background: #262626 !important;
+  border: none !important;
+}
+
+[class$='_ToolRow'],
+[class*='_ToolRow '],
+[class*='_ToolRow_'] {
+  border-radius: 10px !important;
+  font-size: 13px !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. Markdown and code
+   -------------------------------------------------------------------------- */
+
+[class$='_codeBlock'],
+[class*='_codeBlock '],
+[class*='_codeBlock_'] {
+  border-radius: 12px !important;
+  border: 1px solid #2b2b2b !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. Overlays and menus
+   The menu surface comes from `ui-primitives/Menu.module.css` and is rendered
+   with `createPortal(..., document.body)`, so it is a direct child of <body>.
+   Its tokens use the shell convention (`._portal_1nxmc_44`, `._item_1nxmc_92`),
+   which is why an earlier `_menu` selector matched nothing at all.
+   -------------------------------------------------------------------------- */
+
+body > [class*='_portal_'],
+[class*='_list_'] {
+  border-radius: 14px !important;
+  border: 1px solid #333333 !important;
+  /* Codex's menu surface measures #2b2b2b, and its submenu is a step lighter. */
+  background: #2b2b2b !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55) !important;
+}
+
+[class*='_submenu_'] {
+  background: #3c3c3c !important;
+  border-radius: 14px !important;
+  border: 1px solid #454545 !important;
+}
+
+/* Rows and their hover / selected feedback. Codex's rows are ~29.5pt; the
+   primitive's `min-height: 40px; padding: 8px 10px` held them at 43pt even with
+   the description hidden. */
+[class*='_portal_'] [class*='_item_'],
+[class*='_portal_'] [class*='_itemWrap_'],
+[class*='_list_'] [class*='_item_'],
+[class*='_list_'] [class*='_itemWrap_'] {
+  border-radius: 10px !important;
+  min-height: 30px !important;
+  padding-block: 5px !important;
+  line-height: 20px !important;
+  font-size: 13px !important;
+  transition:
+    background-color var(--codex-fast) var(--codex-ease),
+    color var(--codex-fast) var(--codex-ease) !important;
+}
+
+[class*='_portal_'] [class*='_item_']:hover,
+[class*='_portal_'] [class*='_itemWrap_']:hover,
+[class*='_list_'] [class*='_item_']:hover,
+[class*='_list_'] [class*='_itemWrap_']:hover {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* The harness marks selection with a trailing check; Codex also tints the row. */
+[class*='_selected_'] {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[class*='_itemLabel_'] {
+  font-size: 13px !important;
+  line-height: 19px !important;
+}
+
+/* Codex's menu rows are single-line at ~29.5pt pitch; the harness stacks a
+   description under each preset name, which held rows at 57pt even when
+   clipped to one line. The description is hidden outright for that rhythm.
+
+   These three classes belong to the agent-preset package, which is a client
+   bundle — its tokens look like `5QKKHa_itemDesc`, with the hash in FRONT, so
+   the shell-shaped `_itemDesc_` pattern matches nothing. */
+[class$='_itemDesc'],
+[class*='_itemDesc '],
+[class*='_itemDesc_'] {
+  display: none !important;
+}
+
+[class$='_itemName'],
+[class*='_itemName '],
+[class*='_itemName_'] {
+  white-space: nowrap !important;
+}
+
+/* The label column is capped at 280px by the agent-preset package. */
+[class$='_item'],
+[class*='_item '] {
+  max-width: 340px !important;
+}
+
+[class*='_separator_'] {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. Upsell suppression
+   The harness ships no subscription banner, but the model settings surface
+   carries an offer-style welcome notice. Codex's UI shows no equivalent, so
+   it is hidden here. Delete this block to bring it back.
+   -------------------------------------------------------------------------- */
+
+[class$='_WelcomeNotice'],
+[class*='_WelcomeNotice '],
+[class*='_WelcomeNotice_'],
+[class$='_welcomeNotice'],
+[class*='_welcomeNotice '],
+[class*='_welcomeNotice_'] {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   10. Collapsed sidebar
+   Codex removes the sidebar entirely when collapsed and keeps its toggle in
+   the title-bar row beside the traffic lights. The harness instead shrinks to
+   a 56px icon rail whose labels are never rendered, and whose toggle lives
+   inside the rail. The rail width is set to 0 in
+   `patch-harness-layout.sh`, so the toggle is pinned into the title-bar row
+   here — otherwise collapsing would make the sidebar unreachable.
+   -------------------------------------------------------------------------- */
+
+[class$='_frame'][data-sidebar-collapsed] [class$='_toggle'],
+[class*='_frame '][data-sidebar-collapsed] [class$='_toggle'] {
+  /* Position comes from the shared title-bar rule above; collapsed only swaps
+     the glyph. The collapsed toggle's own icon is the product mark, which reads
+     as branding rather than as a control. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17' viewBox='0 0 16 16'%3E%3Cg fill='none' stroke='%23c3c3c3' stroke-width='1.3'%3E%3Crect x='1.6' y='2.6' width='12.8' height='10.8' rx='3.2'/%3E%3Cpath d='M6.1 2.6v10.8'/%3E%3C/g%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 15px 15px !important;
+}
+
+[class$='_frame'][data-sidebar-collapsed] [class$='_toggle'] > *,
+[class*='_frame '][data-sidebar-collapsed] [class$='_toggle'] > * {
+  display: none !important;
+}
+
+[class$='_frame'][data-sidebar-collapsed] [class$='_toggle']:hover,
+[class*='_frame '][data-sidebar-collapsed] [class$='_toggle']:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #dfdfdf !important;
+}
+
+/* The rail is width 0, so its leftovers must not paint or catch pointers. */
+[class$='_frame'][data-sidebar-collapsed] [class$='_sidebarCol'],
+[class*='_frame '][data-sidebar-collapsed] [class$='_sidebarCol'] {
+  border-right: none !important;
+  padding-top: 0 !important;
+  pointer-events: none;
+}
+
+[class$='_frame'][data-sidebar-collapsed] [class$='_sidebarCol'] > *,
+[class*='_frame '][data-sidebar-collapsed] [class$='_sidebarCol'] > * {
+  visibility: hidden;
+}
+
+/* ...except the pinned toggle, which must stay visible and clickable. */
+[class$='_frame'][data-sidebar-collapsed] [class$='_toggle'],
+[class*='_frame '][data-sidebar-collapsed] [class$='_toggle'] {
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* --------------------------------------------------------------------------
+   11. Top mode control
+   Codex puts a Chat | Work segmented control at the top, centred on the main
+   column (measured at 489–707pt, centre 598pt, ~218x35pt, fill #2d2d2d). The
+   harness's agent-preset seat is the same concept — the mode a new session will
+   start in — so it is moved there instead of being faked. `data-slot` is the
+   harness's own extension-slot contract, so it is a stable anchor.
+
+   The control is only visible because `agent-presets.modeSelectionEnabled` is
+   enabled in $DSH_HOME/settings.yaml.
+   -------------------------------------------------------------------------- */
+
+[data-slot='conversation.hero.agentPreset'] [class$='_menuAnchor'],
+[data-slot='conversation.hero.agentPreset'] [class*='_menuAnchor '] {
+  /* The dropdown is positioned against this anchor, not against the button. Only
+     the button was pinned at first, so the menu opened from the anchor's old
+     place inside the workspace strip — far below the control. */
+  position: fixed !important;
+  /* Fixed positioning resolves against the window, so centring on the main
+     column means offsetting by half the sidebar width. */
+  left: calc(50% + 120px) !important;
+  top: 9px !important;
+  transform: translateX(-50%) !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  -webkit-app-region: no-drag;
+}
+
+[data-slot='conversation.hero.agentPreset'] [class$='_seat'],
+[data-slot='conversation.hero.agentPreset'] [class*='_seat '] {
+  min-width: 218px !important;
+  height: 35px !important;
+  box-sizing: border-box !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 999px !important;
+  background: #2d2d2d !important;
+  color: #dfdfdf !important;
+}
+
+/* Collapsed sidebar leaves the main column spanning the window. */
+[class$='_frame'][data-sidebar-collapsed] [data-slot='conversation.hero.agentPreset'] [class$='_menuAnchor'],
+[class*='_frame '][data-sidebar-collapsed] [data-slot='conversation.hero.agentPreset'] [class$='_menuAnchor'] {
+  left: 50% !important;
+}
+
+[data-slot='conversation.hero.agentPreset'] [class$='_seat']:hover,
+[data-slot='conversation.hero.agentPreset'] [class*='_seat ']:hover {
+  background: #383838 !important;
+}
+
+[data-slot='conversation.hero.agentPreset'] [class$='_seatLabel'],
+[data-slot='conversation.hero.agentPreset'] [class*='_seatLabel '] {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #dfdfdf !important;
+}
+
+[data-slot='conversation.hero.agentPreset'] [class$='_seatIcon'],
+[data-slot='conversation.hero.agentPreset'] [class*='_seatIcon '] {
+  color: #c3c3c3 !important;
+}
+
+[data-slot='conversation.hero.agentPreset'] [class$='_chevron'],
+[data-slot='conversation.hero.agentPreset'] [class*='_chevron '] {
+  color: #787878 !important;
+}
+
+/* Codex keeps search and notifications at the right of the brand row. The
+   harness pins session search to the workspace section header instead; it moves
+   to the same right-hand slot, vertically centred on the brand row (58.8pt).
+   While collapsed the sidebar's descendants inherit `visibility: hidden`, so
+   the search disappears with it and only the toggle is re-shown.
+
+   `hb6LJW_searchSlot` is a client-bundle token, so the `$=` / trailing-space
+   patterns are required — `_searchSlot_` alone matches nothing. */
+/* `left: 166px` matched Codex's own search glyph (181–193pt), but Codex also
+   draws a bell at 209–220pt, so its icon group is right-aligned. With a single
+   icon the same left reads as floating, so the icon takes Codex's rightmost
+   slot: glyph centre 214.5pt, ~18pt from the column edge. */
+[class$='_searchSlot'],
+[class*='_searchSlot '],
+[class*='_searchSlot_'] {
+  position: fixed !important;
+  top: 44px !important;
+  left: 200px !important;
+  width: 30px !important;
+  height: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 1001 !important;
+  /* The section-header rule above keeps this slot hidden until the section is
+     hovered. At its new home it is a permanent affordance, as in Codex. */
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag;
+}
+
+/* The slot grows into an input on use. Measured before the fix: the expanded
+   slot stayed anchored at `left: 166px` with a 190px width, so it spanned
+   166–356px and the clear button landed at x=330 — outside a 240px sidebar,
+   floating over the main column. It now anchors to the sidebar's right inset
+   and grows leftward, so the field stays inside the column. */
+[class$='_searchSlotExpanded'],
+[class*='_searchSlotExpanded '],
+[class*='_searchSlotExpanded_'] {
+  left: auto !important;
+  right: calc(100% - 228px) !important;
+  /* `width` alone is not enough: the harness caps the slot with a computed
+     `max-width: calc(0% + 28px)` that animates on expand, which clamped the
+     field back to the collapsed 28px. Both axes are pinned here. */
+  width: 208px !important;
+  max-width: 208px !important;
+  /* Expanded, the field sits over the brand row. Without a solid surface the
+     brand name showed through it. */
+  background: #2b2b2b !important;
+  border: 1px solid #3d3d3d !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+  z-index: 1002 !important;
+}
+
+/* The inner wrapper carries the same animated cap. */
+[class$='_searchExpanded'],
+[class*='_searchExpanded '],
+[class*='_searchExpanded_'] {
+  max-width: none !important;
+}
+
+[class$='_searchInput'],
+[class*='_searchInput '],
+[class*='_searchInput_'] {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   12. Motion
+   Codex animates every surface it swaps. The harness ships the sidebar-grid
+   transition already; these add the hover, press, focus and entry motion the
+   rest of the UI was missing.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --codex-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --codex-fast: 130ms;
+  --codex-base: 220ms;
+}
+
+[class$='_panelRow'],
+[class*='_panelRow '],
+[class$='_newSession'],
+[class*='_newSession '],
+[class$='_iconButton'],
+[class*='_iconButton '],
+[class$='_projectRow'],
+[class*='_projectRow '],
+[class$='_sessionRow'],
+[class*='_sessionRow '],
+[class$='_workspace'],
+[class*='_workspace '],
+[class$='_add'],
+[class*='_add '],
+[class$='_primary'],
+[class*='_primary '],
+[class$='_trigger'],
+[class*='_trigger '] {
+  transition:
+    background-color var(--codex-fast) var(--codex-ease),
+    color var(--codex-fast) var(--codex-ease),
+    border-color var(--codex-fast) var(--codex-ease),
+    border-radius var(--codex-fast) var(--codex-ease),
+    opacity var(--codex-fast) var(--codex-ease),
+    transform var(--codex-fast) var(--codex-ease) !important;
+}
+
+/* The composer card lifts its border on focus instead of snapping it. */
+[class$='_card'],
+[class*='_card '],
+[class*='_card_'] {
+  transition:
+    border-color var(--codex-base) var(--codex-ease),
+    background-color var(--codex-base) var(--codex-ease),
+    border-radius var(--codex-base) var(--codex-ease) !important;
+}
+
+[class$='_card']:focus-within,
+[class*='_card ']:focus-within {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* The send button is the one control Codex gives a springy press. */
+[class$='_primary']:not(:disabled):hover,
+[class*='_primary ']:not(:disabled):hover {
+  transform: scale(1.06) !important;
+}
+
+[class$='_primary']:not(:disabled):active,
+[class*='_primary ']:not(:disabled):active {
+  transform: scale(0.94) !important;
+}
+
+/* Menus and submenus unfold rather than appear. The menu list is portalled into
+   <body> and nested submenus carry `_submenu_`, so both are covered. */
+body > [class*='_portal_'],
+body > [class*='_list_'],
+[class*='_submenu_'] {
+  animation: codex-pop var(--codex-fast) var(--codex-ease) both;
+  transform-origin: top center;
+}
+
+@keyframes codex-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+/* The empty-state heading rises into place. */
+[class$='_headline'],
+[class*='_headline '] {
+  animation: codex-rise 320ms var(--codex-ease) both;
+}
+
+@keyframes codex-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Honour the system setting: this is the only place motion is disabled. The
+   menu selectors mirror the real menu surfaces from section 8 — an earlier
+   `[class$='_menu']` here matched nothing (menus are portalled), so
+   reduced-motion silently left menus animated. */
+@media (prefers-reduced-motion: reduce) {
+  body > [class*='_portal_'],
+  body > [class*='_list_'],
+  [class*='_submenu_'],
+  [class$='_headline'],
+  [class*='_headline '] {
+    animation: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   13. Scrollbars
+   -------------------------------------------------------------------------- */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.24);
+  background-clip: content-box;
+}
